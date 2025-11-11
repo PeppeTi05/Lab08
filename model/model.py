@@ -1,4 +1,6 @@
 from database.impianto_DAO import ImpiantoDAO
+from model.impianto_DTO import Impianto
+from database.consumo_DAO import ConsumoDAO
 
 '''
     MODELLO:
@@ -25,6 +27,24 @@ class Model:
         :param mese: Mese selezionato (un intero da 1 a 12)
         :return: lista di tuple --> (nome dell'impianto, media), es. (Impianto A, 123)
         """
+        risultati = []
+        for impianto in self._impianti:
+            lista_consumi = impianto.get_consumi()
+            consumi_totali = 0.0
+            giorni = 0
+            for consumo in lista_consumi:
+                # visto che in consumo_DTO la data è inizializzata come datetime.date, uso consumo.data.month == mese
+                # per estrarre il mese
+                if consumo.data.month == mese:
+                    giorni = giorni + 1
+                    consumi_totali = consumi_totali + consumo.kwh
+            if giorni > 0:
+                media = consumi_totali / giorni
+            else:
+                media = 0.0
+            risultati.append((impianto.nome, media))
+        return risultati
+
         # TODO
 
     def get_sequenza_ottima(self, mese:int):
