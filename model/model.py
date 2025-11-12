@@ -107,4 +107,3 @@ class Model:
             consumi[impianto.id] = consumi_mese[:7]
         return consumi
         # TODO
-

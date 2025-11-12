@@ -30,4 +30,3 @@ class Impianto:
 
     def __repr__(self):
         return f"{self.id} | {self.nome} | Indirizzo: {self.indirizzo}"
-
