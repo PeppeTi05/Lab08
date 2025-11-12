@@ -65,7 +65,35 @@ class Model:
         return sequenza_nomi, self.__costo_ottimo
 
     def __ricorsione(self, sequenza_parziale, giorno, ultimo_impianto, costo_corrente, consumi_settimana):
-        """ Implementa la ricorsione """
+        """
+        Ricorsione per trovare la sequenza ottimale di interventi nei primi 7 giorni.
+        """
+        # Caso base: abbiamo pianificato tutti i 7 giorni
+        if giorno > 7:
+            if self.__costo_ottimo == -1 or costo_corrente < self.__costo_ottimo:
+                self.__costo_ottimo = costo_corrente
+                self.__sequenza_ottima = sequenza_parziale.copy()
+            return
+
+        # Prova ciascun impianto (ad es. A e B)
+        for id_impianto, consumi in consumi_settimana.items():
+            # Costo consumo giornaliero
+            costo_giorno = consumi[giorno - 1].kwh
+
+            # Se si cambia impianto rispetto al giorno precedente, aggiungi costo di spostamento
+            if ultimo_impianto is not None and id_impianto != ultimo_impianto:
+                costo_giorno += 5
+
+            # Aggiorna la sequenza
+            nuova_sequenza = sequenza_parziale + [id_impianto]
+            nuovo_costo = costo_corrente + costo_giorno
+
+            # Potatura semplice (se già oltre il miglior costo trovato)
+            if self.__costo_ottimo != -1 and nuovo_costo >= self.__costo_ottimo:
+                continue
+
+            # Ricorsione per il giorno successivo
+            self.__ricorsione(nuova_sequenza, giorno + 1, id_impianto, nuovo_costo, consumi_settimana)
         # TODO
 
     def __get_consumi_prima_settimana_mese(self, mese: int):
@@ -73,5 +101,10 @@ class Model:
         Restituisce i consumi dei primi 7 giorni del mese selezionato per ciascun impianto.
         :return: un dizionario: {id_impianto: [kwh_giorno1, ..., kwh_giorno7]}
         """
+        consumi = {}
+        for impianto in self._impianti:
+            consumi_mese = [c for c in impianto.get_consumi() if c.data.month == mese]
+            consumi[impianto.id] = consumi_mese[:7]
+        return consumi
         # TODO
 
